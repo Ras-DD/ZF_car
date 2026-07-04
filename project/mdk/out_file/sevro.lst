@@ -1,0 +1,74 @@
+C251 COMPILER V5.60.0,  sevro                                                              02/07/26  22:44:01  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE sevro
+OBJECT MODULE PLACED IN .\out_file\sevro.obj
+COMPILER INVOKED BY: C:\DAN\keli 51\C251\BIN\C251.EXE ..\code\sevro.c LARGE ROM(HUGE) WARNINGLEVEL(3) OPTIMIZE(SIZE) BRO
+                    -WSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;.
+                    -.\user;..\code;..\..\libraries\zf_components\stc32g_usb_lib;..\..\libraries\zf_components\seekfree_assistant) DEBUG PRIN
+                    -T(.\out_file\sevro.lst) OBJECT(.\out_file\sevro.obj) 
+
+stmt  level    source
+
+    1          #include "sevro.h"
+    2          //舵机中值87.5°   最右最左12.5°
+    3          void servo_setAngle(pwm_channel_enum sever,float angle)
+    4          {
+    5   1              if(angle>12.5|| angle<-12.5)return;
+    6   1              angle=87.5-angle;
+    7   1              pwm_set_duty(sever,SERVO_DUTY(angle));
+    8   1      }
+    9          
+   10          
+   11          void servo_init(void)
+   12          {
+   13   1              pwm_init(SERVO_PWM4,SERVO_FREQ,SERVO_DUTY(87.5));
+   14   1              pwm_set_duty(SERVO_PWM4,4450);//
+   15   1      }
+   16          
+   17          volatile uint16 huQiqiangServo(volatile uint16 input)
+   18          {
+   19   1              //4450
+   20   1              if((input<4565) && (input>4485))
+   21   1              {
+   22   2                      return (volatile uint16)4450;
+   23   2              }
+   24   1              return input;
+   25   1              
+   26   1      }
+   27          
+   28          
+   29          void Servo_Loop(void)
+   30          {
+   31   1              Error_sum();
+   32   1          PID_servof(&servo_pidf);
+   33   1              //Out_servo=huQiqiangServo(Out_servo);
+   34   1          pwm_set_duty(SERVO_PWM4, (uint32)Out_servo);
+   35   1      }
+   36          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =    ------     ------
+  ecode size           =       203     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =    ------          2
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =    ------     ------
+End of Module Information.
+
+C251 COMPILER V5.60.0,  sevro                                                              02/07/26  22:44:01  PAGE 2   
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

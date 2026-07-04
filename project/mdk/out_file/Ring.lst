@@ -1,0 +1,492 @@
+C251 COMPILER V5.60.0,  Ring                                                               02/07/26  22:44:01  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE Ring
+OBJECT MODULE PLACED IN .\out_file\Ring.obj
+COMPILER INVOKED BY: C:\DAN\keli 51\C251\BIN\C251.EXE ..\code\Ring.c LARGE ROM(HUGE) WARNINGLEVEL(3) OPTIMIZE(SIZE) BROW
+                    -SE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..
+                    -\user;..\code;..\..\libraries\zf_components\stc32g_usb_lib;..\..\libraries\zf_components\seekfree_assistant) DEBUG PRINT
+                    -(.\out_file\Ring.lst) OBJECT(.\out_file\Ring.obj) 
+
+stmt  level    source
+
+    1          #include "Ring.h"
+    2          
+    3          //圆环的7个状态(用个蛋的枚举浪费算力,卧槽)
+    4          //left_control_line[SEARCH_IMAGE_H]
+    5          //right_control_line[SEARCH_IMAGE_H]补线就是操作这个两个数组
+    6          uint8 left_control_line[SEARCH_IMAGE_H];        
+    7          uint8 right_control_line[SEARCH_IMAGE_H];
+    8          uint8 current_step=0;
+    9          uint8 key_anlysis1=0,key_anlysis2=0,key_anlysis3=0;
+   10          //圆环状态机
+   11          void Ring(void)
+   12          {
+   13   1              switch (current_step)
+   14   1              {
+   15   2                      //看看有没圆环
+   16   2                      case 0:
+   17   2                              Ring_Pre_Meet();
+   18   2                              if(ring_preMeet_flag)
+   19   2                              {
+   20   3                                      current_step=1;
+   21   3                              }
+   22   2                      case 1:
+   23   2                              Ring_First_meeting();
+   24   2                              if(first_meeting_flag)//key_anlysis1
+   25   2                              {
+   26   3                                      current_step=2;
+   27   3                              }
+   28   2                              break;
+   29   2                      //是否是状态2，现在已经进入圆环
+   30   2                      case 2:
+   31   2                              Ring_Enter();
+   32   2                              if(ring_enter_flag)
+   33   2                              {
+   34   3                                      current_step=3;
+   35   3                              }
+   36   2                              break;
+   37   2                      case 3:
+   38   2                              Ring_Turing();
+   39   2                              if(ring_turn_flag)
+   40   2                              {
+   41   3                                      current_step=4;
+   42   3                              }
+   43   2                              break;
+   44   2                      case 4:
+   45   2                              Ring_Ring_Ring();//爱的和弦铃，耶！
+   46   2                              if(Out_flag)
+   47   2                              {
+   48   3                                      current_step=5;
+   49   3                              }
+   50   2                              break;
+   51   2                      case 5:
+   52   2                              Ring_Out();
+   53   2                              if(Straighten_flag)
+   54   2                              {
+   55   3                                      current_step=6;
+   56   3                              }
+C251 COMPILER V5.60.0,  Ring                                                               02/07/26  22:44:01  PAGE 2   
+
+   57   2                              break;
+   58   2                      case 6:
+   59   2                              Ring_Straighten();
+   60   2                              if(ring_over_flag)
+   61   2                              {
+   62   3                                      current_step=7;
+   63   3                              }
+   64   2                              break;
+   65   2                      case 7:
+   66   2                              Ring_Over();
+   67   2                              break;
+   68   2              }
+   69   1                      
+   70   1      
+   71   1      }
+   72          
+   73          // 限制列坐标在 0 - SEARCH_IMAGE_W-1
+   74          uint8 clamp_col_int16(int16 val)
+   75          {
+   76   1          if(val < 0) return 0;
+   77   1          if(val >= SEARCH_IMAGE_W)return (SEARCH_IMAGE_W - 1);
+   78   1          return (uint8)val;
+   79   1      }
+   80          
+   81          void draw_line(uint8 left_point, uint8 right_point, uint8 to_flag)
+   82          {
+   83   1          float slope;
+   84   1          uint8 i;
+   85   1          uint8 start_row, end_row;
+   86   1          uint8 start_col, end_col;
+   87   1          
+   88   1          // 确定起点和终点
+   89   1          if(left_point > right_point) {
+   90   2              start_row = right_point;
+   91   2              end_row = left_point;
+   92   2              start_col = right_control_line[right_point];  // 右控制线的值
+   93   2              end_col = left_control_line[left_point];      // 左控制线的值
+   94   2          } else {
+   95   2              start_row = left_point;
+   96   2              end_row = right_point;
+   97   2              start_col = left_control_line[left_point];    // 左控制线的值
+   98   2              end_col = right_control_line[right_point];    // 右控制线的值
+   99   2          }
+  100   1          
+  101   1          // 检查是否在同一行
+  102   1          if(end_row == start_row) return;
+  103   1          
+  104   1          // 计算斜率
+  105   1          slope = (float)(end_col - start_col) / (end_row - start_row);
+  106   1          
+  107   1          // 根据to_flag选择填充哪条控制线
+  108   1          if(!to_flag) { // 填充左控制线
+  109   2              for(i = start_row + 1; i < end_row; i++) {
+  110   3                  left_control_line[i] = (uint8)(start_col + slope * (i - start_row) + 0.5f);
+  111   3              }
+  112   2          }
+  113   1          else { // 填充右控制线
+  114   2              for(i = start_row + 1; i < end_row; i++) {
+  115   3                  right_control_line[i] = (uint8)(start_col + slope * (i - start_row) + 0.5f);
+  116   3              }
+  117   2          }
+  118   1      }
+  119          
+  120          
+  121          void connect_point(uint8 under, uint8 top, uint8 l_r)
+  122          {
+C251 COMPILER V5.60.0,  Ring                                                               02/07/26  22:44:01  PAGE 3   
+
+  123   1          float slope;
+  124   1          uint8 i;
+  125   1          
+  126   1          if(!l_r) { // 左边
+  127   2              // 计算斜率: (下方值 - 上方值) / (下方行 - 上方行)
+  128   2              slope = (float)(left_control_line[under] - left_control_line[top]) / (under - top);
+  129   2              
+  130   2              // 从上方的下一行到下方的上一行进行插值
+  131   2              for(i = top + 1; i < under; i++) {
+  132   3                  left_control_line[i] = left_control_line[top] + slope * (i - top);
+  133   3              }
+  134   2          }
+  135   1          else { // 右边
+  136   2              slope = (float)(right_control_line[under] - right_control_line[top]) / (under - top);
+  137   2              
+  138   2              for(i = top + 1; i < under; i++) {
+  139   3                  right_control_line[i] = right_control_line[top] + slope * (i - top);
+  140   3              }
+  141   2          }
+  142   1      }
+  143          
+  144          
+  145          //判断是否连续的函数
+  146          uint8 isContinueLine(uint8* arr)
+  147          {
+  148   1              int16 i;
+  149   1              uint8 bad_cnt = 0;
+  150   1              uint8 valid_cnt = 0;
+  151   1              for(i = SEARCH_IMAGE_H-1-PIXEL_OFFSET; i > 7*PIXEL_OFFSET; i -= PIXEL_OFFSET)
+  152   1              {
+  153   2                      uint8 curr = arr[i];
+  154   2                      uint8 prev = arr[i - PIXEL_OFFSET];
+  155   2                      if(abs(curr-prev)>40){
+  156   3                              return 0;
+  157   3                      }
+  158   2              }
+  159   1              return 1;
+  160   1      }
+  161          
+  162          uint8 ring_preMeet_flag=0;
+  163          uint8 Ring_Pre_Meet(void)
+  164          {
+  165   1              uint8 r_con,l_con;
+  166   1              r_con=isContinueLine(right_edge_line);
+  167   1              l_con=isContinueLine(left_edge_line);
+  168   1      
+  169   1              if(r_con != l_con)
+  170   1              {
+  171   2                      ring_preMeet_flag=1;
+  172   2                      return 1;
+  173   2              }
+  174   1              else
+  175   1              {
+  176   2                      ring_preMeet_flag=0;
+  177   2                      return 0;
+  178   2              }
+  179   1                      
+  180   1      }
+  181          
+  182          uint8 Ring_Pre_Meet_use(void)
+  183          {
+  184   1              uint8 r_con,l_con;
+  185   1              r_con=isContinueLine(right_edge_line);
+  186   1              l_con=isContinueLine(left_edge_line);
+  187   1      
+  188   1              if(r_con != l_con)
+C251 COMPILER V5.60.0,  Ring                                                               02/07/26  22:44:01  PAGE 4   
+
+  189   1              {
+  190   2                      return 1;
+  191   2              }
+  192   1              else
+  193   1              {
+  194   2                      return 0;
+  195   2              }
+  196   1                      
+  197   1      }
+  198          
+  199          
+  200          
+  201          uint8 ring_l,ring_r;    //圆环左右标志位
+  202          uint8 first_meeting_flag=0;     //初见圆环标志位
+  203          void Ring_First_meeting(void)
+  204          {
+  205   1              uint8 i;//,j;//遍历索引  j是找上拐点的索引
+  206   1              uint8 under,top,mid;
+  207   1              
+  208   1              uint8 turnPoint=119,midPoint=0;
+  209   1              
+  210   1              if(!Ring_Pre_Meet_use()){
+  211   2                      current_step=0;
+  212   2                      ring_preMeet_flag=0;
+  213   2              }
+  214   1              
+  215   1              for(i=SEARCH_IMAGE_H-1-PIXEL_OFFSET;i>30;i-=PIXEL_OFFSET)//下拐点
+  216   1              {
+  217   2                      under=left_edge_line[i];
+  218   2                      top=left_edge_line[i-PIXEL_OFFSET];
+  219   2              
+  220   2                      if((under-top) >=15){
+  221   3                              turnPoint=i;
+  222   3                              break;
+  223   3                      }
+  224   2              }
+  225   1              
+  226   1      
+  227   1              for(i=turnPoint-PIXEL_OFFSET;i>PIXEL_OFFSET;i-=PIXEL_OFFSET)
+  228   1              {
+  229   2                      under=left_edge_line[i+PIXEL_OFFSET];
+  230   2                      mid=  left_edge_line[i];
+  231   2                      top=  left_edge_line[i-PIXEL_OFFSET];
+  232   2              
+  233   2                      if(mid>=under && mid>=top && mid>30){
+  234   3                              midPoint=i;
+  235   3                      }
+  236   2              }
+  237   1      
+  238   1      
+  239   1              
+  240   1              if(turnPoint && midPoint)
+  241   1                      connect_point(turnPoint,midPoint,0);
+  242   1              
+  243   1              
+  244   1              //终止条件    //少了弯道的元素互斥
+  245   1              if(midPoint && left_edge_line[115]<=2 && left_edge_line[85]<=2 &&left_edge_line[55]<=2)
+  246   1              {
+  247   2                      first_meeting_flag=1;
+  248   2              }
+  249   1      
+  250   1              
+  251   1      }
+  252          
+  253          
+  254          uint8 ring_enter_flag;
+C251 COMPILER V5.60.0,  Ring                                                               02/07/26  22:44:01  PAGE 5   
+
+  255          static uint8 mid_under_flag=0;
+  256          void Ring_Enter(void)
+  257          {
+  258   1              uint8 i,under,mid,top,ttop,uunder;//行索引  j是为了找到最左端边界设置的索引
+  259   1              uint8 midPoint;
+  260   1              
+  261   1              for(i=SEARCH_IMAGE_H -1 - 2 * PIXEL_OFFSET;i>PIXEL_OFFSET*2;i-=PIXEL_OFFSET)
+  262   1              {       
+  263   2                      uunder=left_edge_line[i+PIXEL_OFFSET+PIXEL_OFFSET];
+  264   2                      under=left_edge_line[i+PIXEL_OFFSET];
+  265   2                      mid=  left_edge_line[i]; 
+  266   2                      top=  left_edge_line[i-PIXEL_OFFSET];
+  267   2                      ttop=left_edge_line[i-PIXEL_OFFSET-PIXEL_OFFSET];
+  268   2                      if(mid<8)continue;
+  269   2                      if(    mid>=under && (mid-under)<20
+  270   2                              && under>=uunder && (under-uunder)<20
+  271   2                              && mid>=top   && (mid-top)<20
+  272   2                              && top>=ttop   && (top-ttop)<20
+  273   2                              && mid>30)
+  274   2                      {
+  275   3                              midPoint=i;
+  276   3                              break;
+  277   3                      }
+  278   2                      
+  279   2              }
+  280   1              if(midPoint)
+  281   1                      connect_point(119,midPoint,0);
+  282   1              else{//回到上一步
+  283   2                      first_meeting_flag = 0;
+  284   2                      current_step = 1;
+  285   2              }
+  286   1              if(midPoint>=60)
+  287   1                      mid_under_flag=1;
+  288   1              
+  289   1              if(mid_under_flag && midPoint<45)
+  290   1              {
+  291   2                      ring_enter_flag=1;
+  292   2              }
+  293   1                      
+  294   1      }
+  295          
+  296          
+  297          //状态3补线拉到右下角，找左边上拐点
+  298          uint8 ring_turn_flag=0;
+  299          void Ring_Turing(void)
+  300          {
+  301   1              uint8 i,under,top;
+  302   1              uint8 leftTopPoint;
+  303   1      
+  304   1              for(i=SEARCH_IMAGE_H-1;i>PIXEL_OFFSET;i-=PIXEL_OFFSET)
+  305   1              {
+  306   2                      top=left_edge_line[i-PIXEL_OFFSET];
+  307   2                      under=left_edge_line[i];
+  308   2              
+  309   2                      if(abs(top-under)>30){
+  310   3                              leftTopPoint=i-PIXEL_OFFSET;
+  311   3                              break;
+  312   3                      }                                                                                                                                       
+  313   2              }                                                                               
+  314   1              draw_line(leftTopPoint,119,1);
+  315   1      
+  316   1              
+  317   1              if(leftTopPoint>=controlReferenceLine-20){
+  318   2                      ring_turn_flag=1;                                                                                                               
+  319   2              }                                                                                                       
+  320   1                                                                                                                              
+C251 COMPILER V5.60.0,  Ring                                                               02/07/26  22:44:01  PAGE 6   
+
+  321   1      }                                                                                                                               
+  322                  
+  323          
+  324          //今天从这里开始
+  325          //现在是在环里转圈，不断检测是否到达边界
+  326          uint8 Out_flag=0;//出环状态的标志
+  327          void Ring_Ring_Ring(void)
+  328          {
+  329   1              uint8 i;//索引
+  330   1              uint8 minPoint,index,minn=188;
+  331   1              
+  332   1              if(left_control_line[controlReferenceLine]>Mid_Col){
+  333   2                      left_control_line[controlReferenceLine]=0;
+  334   2              }
+  335   1              
+  336   1              for(i=SEARCH_IMAGE_H-1;i>PIXEL_OFFSET*3;i-=PIXEL_OFFSET)
+  337   1              {
+  338   2                      index=right_edge_line[i];
+  339   2                      if(index<minn){
+  340   3                              minn=index;
+  341   3                              minPoint=i;
+  342   3                      }                                                                                                                               
+  343   2              }
+  344   1              if(
+  345   1                      (right_edge_line[minPoint-PIXEL_OFFSET]-right_edge_line[minPoint]<30
+  346   1                && right_edge_line[minPoint+PIXEL_OFFSET]-right_edge_line[minPoint]<30)
+  347   1                      ||  minPoint<40 ){
+  348   2                      draw_line(0,119,1);
+  349   2              }
+  350   1              
+  351   1              if(     right_edge_line[50]>180 &&
+  352   1                      right_edge_line[60]>180 &&
+  353   1                      right_edge_line[70]>180 &&
+  354   1                      right_edge_line[80]>180 &&
+  355   1                      right_edge_line[90]>180 &&
+  356   1                      left_edge_line[50]<2){
+  357   2                      Out_flag=1;
+  358   2              }
+  359   1      
+  360   1      }
+  361          
+  362                  
+  363          
+  364          uint8 Straighten_flag=0;//出环摆正标志位
+  365          void Ring_Out(void)//这个十分的对
+  366          {
+  367   1              
+  368   1              
+  369   1              draw_line(0,119,1);
+  370   1              if(     (left_edge_line[30]>16   || left_edge_line[40]>16   || left_edge_line[50]>16) 
+  371   1                      &&(right_edge_line[40]-left_edge_line[40]<170)
+  372   1                      &&(right_edge_line[50]-left_edge_line[50]<170)
+  373   1                      &&(right_edge_line[60]-left_edge_line[60]<170)
+  374   1              )
+  375   1              {
+  376   2                      Straighten_flag=1;
+  377   2              }
+  378   1              
+  379   1              
+  380   1      }
+  381          
+  382          
+  383          //找左边上拐点,补线到左下角
+  384          uint8 ring_over_flag=0;
+  385          uint16 cnt_over=0;
+  386          void Ring_Straighten(void)
+C251 COMPILER V5.60.0,  Ring                                                               02/07/26  22:44:01  PAGE 7   
+
+  387          {
+  388   1              uint8 i;//i是右边的索引，j是左边的索引
+  389   1              uint8 under,mid,top;//遍历x右边线
+  390   1              uint8 midPoint;
+  391   1      
+  392   1              for(i=SEARCH_IMAGE_H-1-PIXEL_OFFSET;i>PIXEL_OFFSET;i-=PIXEL_OFFSET)
+  393   1              {
+  394   2                      under=left_edge_line[i+PIXEL_OFFSET];
+  395   2                      mid=  left_edge_line[i];
+  396   2                      top=  left_edge_line[i-PIXEL_OFFSET];
+  397   2              
+  398   2                      if(mid>=under && mid>=top && mid>30){
+  399   3                              midPoint=i;
+  400   3                      }
+  401   2              }
+  402   1              if(midPoint){
+  403   2                      connect_point(119,midPoint,0);
+  404   2              }
+  405   1                      
+  406   1              
+  407   1              if(isContinueLine(left_edge_line) && isContinueLine(right_edge_line)){  
+  408   2                      ring_over_flag=1;
+  409   2              }
+  410   1      
+  411   1      }
+  412          
+  413          //结束标志位清零，然后重返状态一
+  414          void Ring_Over(void)
+  415          {
+  416   1          first_meeting_flag = 0;
+  417   1          ring_l = 0;
+  418   1          ring_r = 0;
+  419   1          ring_enter_flag = 0;
+  420   1          ring_turn_flag = 0;
+  421   1          Out_flag = 0;
+  422   1          Straighten_flag = 0;
+  423   1          ring_over_flag = 0;
+  424   1          mid_under_flag = 0;
+  425   1          current_step = 0;
+  426   1          cnt_over = 0;
+  427   1      }
+  428          
+  429          
+  430          
+*** WARNING C183 IN LINE 149 OF ..\code\Ring.c: dead assignment eliminated
+*** WARNING C183 IN LINE 150 OF ..\code\Ring.c: dead assignment eliminated
+*** WARNING C184 IN LINE 280 OF ..\code\Ring.c: value of 'midPoint' possibly undefined
+*** WARNING C184 IN LINE 281 OF ..\code\Ring.c: value of 'midPoint' possibly undefined
+*** WARNING C184 IN LINE 286 OF ..\code\Ring.c: value of 'midPoint' possibly undefined
+*** WARNING C184 IN LINE 289 OF ..\code\Ring.c: value of 'midPoint' possibly undefined
+*** WARNING C184 IN LINE 314 OF ..\code\Ring.c: value of 'leftTopPoint' possibly undefined
+*** WARNING C184 IN LINE 344 OF ..\code\Ring.c: value of 'minPoint' possibly undefined
+*** WARNING C184 IN LINE 344 OF ..\code\Ring.c: value of 'minPoint' possibly undefined
+*** WARNING C184 IN LINE 344 OF ..\code\Ring.c: value of 'minPoint' possibly undefined
+*** WARNING C184 IN LINE 402 OF ..\code\Ring.c: value of 'midPoint' possibly undefined
+*** WARNING C184 IN LINE 403 OF ..\code\Ring.c: value of 'midPoint' possibly undefined
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =    ------     ------
+  ecode size           =      1948     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =       256          6
+  xdata-const size     =    ------     ------
+C251 COMPILER V5.60.0,  Ring                                                               02/07/26  22:44:01  PAGE 8   
+
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        73     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  12 WARNING(S),  0 ERROR(S)

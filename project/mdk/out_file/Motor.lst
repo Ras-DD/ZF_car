@@ -1,0 +1,173 @@
+C251 COMPILER V5.60.0,  Motor                                                              02/07/26  22:44:01  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE Motor
+OBJECT MODULE PLACED IN .\out_file\Motor.obj
+COMPILER INVOKED BY: C:\DAN\keli 51\C251\BIN\C251.EXE ..\code\Motor.c LARGE ROM(HUGE) WARNINGLEVEL(3) OPTIMIZE(SIZE) BRO
+                    -WSE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;.
+                    -.\user;..\code;..\..\libraries\zf_components\stc32g_usb_lib;..\..\libraries\zf_components\seekfree_assistant) DEBUG PRIN
+                    -T(.\out_file\Motor.lst) OBJECT(.\out_file\Motor.obj) 
+
+stmt  level    source
+
+    1          #include "Motor.h"
+    2          
+    3          #define MAX_DUTY            ( 20 )                             
+    4          int8 duty = 0;
+    5          int8 dir = 1;
+    6          
+    7          #define ENCODER_DIR_1                 (PWMA_ENCODER)              // 带方向编码器对应使用的编码器接口 
+    8          #define ENCODER_DIR_PULSE_1           (PWMA_ENCODER_CH1P_P60)     // PULSE 对应的引脚
+    9          #define ENCODER_DIR_DIR_1             (PWMA_ENCODER_CH2P_P62)     // DIR 对应的引脚
+   10          
+   11          #define ENCODER_DIR_2                   (PWMC_ENCODER)              // 带方向编码器对应使用的编码器接口
+   12          #define ENCODER_DIR_PULSE_2                     (PWMC_ENCODER_CH1P_P40)     // PULSE 对应的引脚
+   13          #define ENCODER_DIR_DIR_2               (PWMC_ENCODER_CH2P_P42)     // DIR 对应的引脚
+   14          
+   15          int16 encoder_data_r=0;
+   16          int16 encoder_data_l=0;
+   17          
+   18          void Motor_Init(void)
+   19          {
+   20   1              gpio_init(DIR_L, GPO, GPIO_HIGH, GPO_PUSH_PULL);   // GPIO 初始化为输出 默认上拉输出高
+   21   1          pwm_init(PWM_L, 17000, 0);                         // PWM 通道初始化频率 17KHz 占空比初始为 0
+   22   1      
+   23   1          gpio_init(DIR_R, GPO, GPIO_HIGH, GPO_PUSH_PULL);   // GPIO 初始化为输出 默认上拉输出高
+   24   1          pwm_init(PWM_R, 17000, 0);                         // PWM 通道初始化频率 17KHz 占空比初始为 0
+   25   1      
+   26   1      }
+   27          
+   28          
+   29          //
+   30          //左轮正转1秒反转1秒蜂鸣器鸣叫，右轮正转1秒反转1秒蜂鸣器鸣叫
+   31          #define M_TEST  1000
+   32          void motor_test(void)
+   33          {
+   34   1                      gpio_set_level(DIR_L, GPIO_HIGH);  
+   35   1                      pwm_set_duty (PWM_L, M_TEST);
+   36   1                      system_delay_ms(1000);
+   37   1                      gpio_set_level(DIR_L, GPIO_LOW);  
+   38   1                      system_delay_ms(1000);
+   39   1                      
+   40   1                      pwm_set_duty (PWM_L, 0);
+   41   1                      gpio_set_level(IO_P65, 1);system_delay_ms(200);
+   42   1                      gpio_set_level(IO_P65, 0);
+   43   1                      
+   44   1                      gpio_set_level(DIR_R, GPIO_HIGH);  
+   45   1                      pwm_set_duty (PWM_R, M_TEST);
+   46   1                      system_delay_ms(1000);
+   47   1                      gpio_set_level(DIR_R, GPIO_LOW);  
+   48   1                      system_delay_ms(1000);
+   49   1                      pwm_set_duty (PWM_R, 0);
+   50   1                      gpio_set_level(IO_P65, 1);system_delay_ms(200);
+   51   1                      gpio_set_level(IO_P65, 0);
+   52   1      
+   53   1      }
+   54          void Motor_control(pwm_channel_enum wheel,int16 speed)
+   55          {
+   56   1              if(speed>=0){
+C251 COMPILER V5.60.0,  Motor                                                              02/07/26  22:44:01  PAGE 2   
+
+   57   2                      if(wheel==PWM_L){
+   58   3                              gpio_set_level(DIR_L, GPIO_HIGH);                                    
+   59   3                              pwm_set_duty(PWM_L, speed);             
+   60   3                      }
+   61   2                      else {
+   62   3                              gpio_set_level(DIR_R, GPIO_HIGH);                                    
+   63   3                              pwm_set_duty(PWM_R, speed);     
+   64   3                      }            
+   65   2              }
+   66   1              else {
+   67   2                      if(wheel==PWM_L){
+   68   3                              gpio_set_level(DIR_L, GPIO_LOW);                                    
+   69   3                              pwm_set_duty(PWM_L, -speed);            
+   70   3                      }
+   71   2                      else {
+   72   3                              gpio_set_level(DIR_R, GPIO_LOW);                                    
+   73   3                              pwm_set_duty(PWM_R, -speed);    
+   74   3                      }              
+   75   2              }
+   76   1      }
+   77          
+   78          void Encoder_GetValue(void)
+   79          {
+   80   1          encoder_data_r = -encoder_get_count(ENCODER_DIR_1);                  // 获取编码器计数
+   81   1          encoder_data_l = encoder_get_count(ENCODER_DIR_2);
+   82   1              
+   83   1              
+   84   1          encoder_clear_count(ENCODER_DIR_1);                                         // 清空编码器计数
+   85   1          encoder_clear_count(ENCODER_DIR_2);  
+   86   1      }
+   87          
+   88          int16 tar_speed=120;
+   89          int16 diff_left,diff_right;
+   90          float diff_kp=-0;//0.30.25
+   91          void Dream_speed(void)
+   92          {                                               
+   93   1          uint16 tp_turn;
+   94   1              int8 delta = (int8)(err_sum - Mid_Col);
+   95   1          // 计算舵机偏离中值的程度
+   96   1          if (Out_servo >  SERVO_CENTER)//左拐
+   97   1          {
+   98   2              tp_turn = Out_servo - SERVO_CENTER;
+   99   2                      diff_left  = (int16)(- delta * diff_kp);
+  100   2                      diff_right = (int16)( 0.76f *  delta * diff_kp);
+  101   2          }
+  102   1          else                        //右拐
+  103   1          {
+  104   2              tp_turn = SERVO_CENTER - Out_servo;
+  105   2                      delta = -delta;   // 转为正偏差量 (Mid_Col - err_sum)
+  106   2                      diff_left  = (int16)(   0.76f* delta * diff_kp);
+  107   2                      diff_right = (int16)(-  delta * diff_kp);
+  108   2          }
+  109   1      
+  110   1          // 限幅，防止超过最大转向量
+  111   1          if (tp_turn > MAX_TURN)
+  112   1          {
+  113   2              tp_turn = MAX_TURN;
+  114   2          }
+  115   1      
+  116   1          // 直道：tp_turn = 0        → tar_speed = MAX_SPEED
+  117   1          // 弯道：tp_turn 越大      → tar_speed 越低
+  118   1          // 最大转向：tp_turn=MAX_TURN → tar_speed = MIN_SPEED
+  119   1          tar_speed = MAX_SPEED -
+  120   1                      (uint32)(MAX_SPEED - MIN_SPEED) * tp_turn / MAX_TURN;
+  121   1      }
+  122          
+C251 COMPILER V5.60.0,  Motor                                                              02/07/26  22:44:01  PAGE 3   
+
+  123          
+  124          void Motor_Loop(void)
+  125          {
+  126   1              //Dream_speed();
+  127   1              Increment_PIDf(&pid_lf,(float)tar_speed,encoder_data_l);//+diff_left
+  128   1              Increment_PIDf(&pid_rf,(float)tar_speed,encoder_data_r);//+diff_right
+  129   1              
+  130   1              Motor_control(PWM_L,(int16)pid_lf.out);
+  131   1              Motor_control(PWM_R,(int16)pid_rf.out); 
+  132   1      }
+  133          
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =    ------     ------
+  ecode size           =       905     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =        16     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        42     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

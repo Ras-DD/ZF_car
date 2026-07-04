@@ -1,0 +1,217 @@
+C251 COMPILER V5.60.0,  main                                                               04/07/26  10:53:07  PAGE 1   
+
+
+C251 COMPILER V5.60.0, COMPILATION OF MODULE main
+OBJECT MODULE PLACED IN .\out_file\main.obj
+COMPILER INVOKED BY: C:\DAN\keli 51\C251\BIN\C251.EXE ..\user\main.c LARGE ROM(HUGE) WARNINGLEVEL(3) OPTIMIZE(SIZE) BROW
+                    -SE INCDIR(..\..\libraries\zf_common;..\..\libraries\zf_components;..\..\libraries\zf_device;..\..\libraries\zf_driver;..
+                    -\user;..\code;..\..\libraries\zf_components\stc32g_usb_lib;..\..\libraries\zf_components\seekfree_assistant) DEBUG PRINT
+                    -(.\out_file\main.lst) OBJECT(.\out_file\main.obj) 
+
+stmt  level    source
+
+    1           /*******************************************************************************************************
+             -**************
+    2          * STC32G144K Opensourec Library 即（STC32G144K 开源库）是一个基于官方 SDK 接口的第三方开源库
+    3          * 修改记录                               天天都在改
+    4          * 日期              作者                   备注
+    5          * 2026-1-23      川普大帅哥            first version
+    6          *********************************************************************************************************
+             -***********/
+    7          #include "zf_common_headfile.h"
+    8          // **************************** 代码区域 ****************************
+    9          uint8 ControlFlag=0;  //发车是 1   图传是0
+   10          uint32 time=0;
+   11          /*
+   12          void main(void)
+   13          {
+   14                  System_Init();
+   15                  //laser_on();
+   16              while(1)
+   17              {
+   18                          
+   19                      //motor_test();
+   20                          //tft180_show_string(0,64,"VBAT:");
+   21                          //tft180_show_float(32,64,Vbat*0.008826,4,6);
+   22                                          
+   23                          //test_ss();    //wifiSPI的收发信息     
+   24                          //tft_image_tset();
+   25                          
+   26                          //Key_Anlysis();//按键
+   27                          
+   28                          //Out_servo=seekfree_assistant_parameter[0];
+   29          
+   30                          //printf("%d, %d\r\n",imu660ra_gyro_z,encoder_data_l);
+   31                          //printf("%d\r\n",imu660ra_gyro_z);
+   32          //              tar_speed = seekfree_assistant_parameter[0];
+   33          //              pid_lf.kp=seekfree_assistant_parameter[1];
+   34          //              pid_lf.ki=seekfree_assistant_parameter[2];
+   35          //              pid_lf.kd=seekfree_assistant_parameter[3];              
+   36                          //seekfree_assistant_data_analysis();
+   37                          
+   38                          //图像
+   39                          //差比和只是过去了家人们 
+   40                          if(mt9v03x_finish_flag){
+   41                                  //memcpy(image_copy[0], mt9v03x_image[0], MT9V03X_IMAGE_SIZE);
+   42                                  get_reference_point(mt9v03x_image[0]);
+   43                                  Search_reference_col(mt9v03x_image[0]);
+   44                                  Search_line(mt9v03x_image[0]);
+   45                                  //Ring();
+   46                                  Fitted_Midline();
+   47                                  if(!ControlFlag){
+   48                                          seekfree_assistant_camera_send();       
+   49                                  }
+   50                                          
+   51                                  mt9v03x_finish_flag=0;
+   52                          }
+   53                          
+   54          //              if(mt9v03x_finish_flag){
+C251 COMPILER V5.60.0,  main                                                               04/07/26  10:53:07  PAGE 2   
+
+   55          //                      memcpy(base_image[0], mt9v03x_image[0], MT9V03X_IMAGE_SIZE);
+   56          //                      Threshold=otsuThreshold(base_image[0]);
+   57          //                      base_image_threshold(Threshold);
+   58          //                      
+   59          //                      if(!ControlFlag){
+   60          //                              seekfree_assistant_camera_send();       
+   61          //                      }
+   62          //                      
+   63          //                      mt9v03x_finish_flag=0;
+   64          //              }
+   65                          
+   66                          
+   67                          
+   68                          
+   69                          
+   70                          ///laser_off();
+   71                          
+   72                                          //laser_on();
+   73                                          //image_send_seekfree();//逐飞助手发送图像
+   74          //         if(mt9v03x_finish_flag)
+   75          //        {
+   76          //            mt9v03x_finish_flag = 0;
+   77          //                      //iiiii=otsu_fast((const uint8 *)mt9v03x_image);
+   78          //                      get_reference_point(mt9v03x_image[0]);
+   79          //                      Search_reference_col(mt9v03x_image[0]);
+   80          //                      Search_line(mt9v03x_image[0]);
+   81          //                      Ring();
+   82          //                      Fitted_Midline();
+   83          //                      
+   84          //                      
+   85          //                      //Pre_Scan();
+   86          //                      Target_find(pre_find_offset);
+   87          //                      ips200_show_gray_image(0,0,(const uint8*)mt9v03x_image,188,120,188,120,tar_th);
+   88          //                      
+   89          //                      ips200_show_string(0,120,"Find_offset:");
+   90          //                      ips200_show_int8(90,120,pre_find_offset);
+   91          //                      
+   92          //                      
+   93          //                      ips200_show_string(0,136,"L R T U:");
+   94          //                      ips200_show_uint8(70,136,l_d);
+   95          //                      ips200_show_uint8(102,136,r_d);
+   96          //                      ips200_show_uint8(134,136,top_d);
+   97          //                      ips200_show_uint8(166,136,under_d);
+   98          
+   99          //                      ips200_show_string(0,152,"Th S:");
+  100          //                      ips200_show_uint8(48,152,tar_th);
+  101          //                      ips200_show_uint8(96,152,debug_stage);
+  102          
+  103          //                      ips200_show_string(0,168,"X  Y:");
+  104          //                      ips200_show_uint8(50,168,tar_x);
+  105          //                      ips200_show_uint8(82,168,tar_y);
+  106          
+  107          
+  108          //                      if(tar_flag)
+  109          //                      {
+  110          //                              isp_200_draw_col(tar_x,120,0,RGB565_BLUE);
+  111          //                              isp_200_draw_row(tar_y,188,0,RGB565_BLUE);
+  112          //                      }
+  113          //              }
+  114                                          //gpio_set_level(IO_P65, 1);                    
+  115                                          //image_send_seekfree();                        
+  116                                          //motor_test();                                                 
+  117          
+  118                          
+  119          //                              system_delay(1000);
+  120                                          
+C251 COMPILER V5.60.0,  main                                                               04/07/26  10:53:07  PAGE 3   
+
+  121                          
+  122          //                              if(ring_l)                      
+  123          //                                      Buzzer_On();                    
+  124          //                              else                                    
+  125          //                                      Buzzer_Off();                           
+  126                                                                                          
+  127           
+  128          
+  129                  
+  130              }
+  131          }
+  132          
+  133          
+  134          
+  135          */
+  136          
+  137          
+  138          
+  139          
+  140          void main(void)
+  141          {
+  142   1              System_Init();
+  143   1      
+  144   1      
+  145   1              gpio_init(IO_P65, GPO, 1, GPO_PUSH_PULL);
+  146   1              gpio_init(IO_P52,GPO,1,GPO_PUSH_PULL);
+  147   1              
+  148   1              Buzzer_On();
+  149   1              system_delay_ms(1000);
+  150   1              Buzzer_Off();
+  151   1              while(1)
+  152   1              {
+  153   2                      
+  154   2                      system_delay_ms(200);
+  155   2                      gpio_toggle_level(IO_P52);
+  156   2                      system_delay_ms(200);
+  157   2              }
+  158   1      }
+  159          
+  160          void pit_handler(void)
+  161          {
+  162   1              if(ControlFlag){
+  163   2                      imu660ra_get_gyro();
+  164   2                      Encoder_GetValue();
+  165   2                      
+  166   2                      Motor_Loop();
+  167   2              }Servo_Loop();
+  168   1              time++;
+  169   1              if(time==2000){
+  170   2                      //controlFlag=0;
+  171   2              }
+  172   1              
+  173   1      }
+
+
+Module Information          Static   Overlayable
+------------------------------------------------
+  code size            =    ------     ------
+  ecode size           =       228     ------
+  data size            =    ------     ------
+  idata size           =    ------     ------
+  pdata size           =    ------     ------
+  xdata size           =         5     ------
+  xdata-const size     =    ------     ------
+  edata size           =    ------     ------
+  bit size             =    ------     ------
+  ebit size            =    ------     ------
+C251 COMPILER V5.60.0,  main                                                               04/07/26  10:53:07  PAGE 4   
+
+  bitaddressable size  =    ------     ------
+  ebitaddressable size =    ------     ------
+  far data size        =    ------     ------
+  huge data size       =    ------     ------
+  const size           =    ------     ------
+  hconst size          =        17     ------
+End of Module Information.
+
+
+C251 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
