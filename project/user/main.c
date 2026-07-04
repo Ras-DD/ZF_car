@@ -8,7 +8,7 @@
 // **************************** 代码区域 ****************************
 uint8 ControlFlag=0;  //发车是 1   图传是0
 uint32 time=0;
-/*
+
 void main(void)
 {
 	System_Init();
@@ -132,30 +132,9 @@ void main(void)
 
 
 
-*/
 
 
 
-
-void main(void)
-{
-	System_Init();
-
-
-	gpio_init(IO_P65, GPO, 1, GPO_PUSH_PULL);
-	gpio_init(IO_P52,GPO,1,GPO_PUSH_PULL);
-	
-	Buzzer_On();
-	system_delay_ms(1000);
-	Buzzer_Off();
-	while(1)
-	{
-		
-		system_delay_ms(200);
-		gpio_toggle_level(IO_P52);
-		system_delay_ms(200);
-	}
-}
 
 void pit_handler(void)
 {
