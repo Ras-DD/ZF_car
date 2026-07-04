@@ -132,8 +132,6 @@ void main(void)
 
 
 
-
-
 void pit_handler(void)
 {
 	if(ControlFlag){
