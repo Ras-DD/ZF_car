@@ -131,6 +131,12 @@ void main(void)
 }
 
 
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> parent of 6d3a772 (又删)
 void pit_handler(void)
 {
 	if(ControlFlag){
