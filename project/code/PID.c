@@ -54,7 +54,7 @@ void Increment_PIDf(volatile PID_tf *pid, float tar_val, float act_val)
 
 
 volatile PID_tf servo_pidf = {
-		50.0f,  //P   65
+		10.0f,  //P   65
 		0.0f, 	//I
 		0.0f, 	//D
 		0.20f, 	//мсбщрг  0.23

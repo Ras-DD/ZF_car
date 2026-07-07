@@ -3,8 +3,8 @@
 
 #include "zf_common_headfile.h"
 
-#define OUT_MAX     3000
-#define OUT_MIN    -3000
+#define OUT_MAX     1000
+#define OUT_MIN    -1000
 
 extern volatile uint16 Out_servo;
 typedef struct

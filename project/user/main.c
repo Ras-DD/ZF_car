@@ -1,9 +1,4 @@
- /*********************************************************************************************************************
-* STC32G144K Opensourec Library ï¿½ï¿½ï¿½ï¿½STC32G144K ï¿½ï¿½Ô´ï¿½â£©ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Ú¹Ù·ï¿½ SDK ï¿½Ó¿ÚµÄµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½
-* ï¿½Þ¸Ä¼ï¿½Â¼                               ï¿½ï¿½ï¿½ì¶¼ï¿½Ú¸ï¿½
-* ï¿½ï¿½ï¿½ï¿½              ï¿½ï¿½ï¿½ï¿½                   ï¿½ï¿½×¢
-* 2026-1-23      ï¿½ï¿½ï¿½Õ´ï¿½Ë§ï¿½ï¿½            first version
-********************************************************************************************************************/
+
 #include "zf_common_headfile.h"
 // **************************** ´úÂëÇøÓò ****************************
 uint8 ControlFlag=1;  //·¢³µÊÇ 1   Í¼´«ÊÇ0
@@ -82,6 +77,9 @@ void main(void)
 			Ring();
 			Fitted_Midline();
 			
+			if(ControlFlag){
+				seekfree_assistant_camera_send();	
+			}
 			
 			Pre_Scan();
 			Target_find(pre_find_offset);
@@ -107,6 +105,10 @@ void main(void)
 
 			ips200_show_int16(0, 184, (int16)pid_lf.out);
 			ips200_show_int16(80, 184, (int16)pid_rf.out);
+
+			ips200_show_uint8(0, 200, ring_preMeet_flag);
+			ips200_show_uint8(70, 200, first_meeting_flag);
+			ips200_show_uint8(130, 200, ring_enter_flag);
 			
 			
 			if(tar_flag)

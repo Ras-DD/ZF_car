@@ -11,13 +11,13 @@ extern int16 tar_speed;
 #define  DIR_L              ( IO_P77 )
 #define  PWM_L              ( PWMB_CH3_P76 )
 
-#define ENCODER_DIR_1                 	(PWMA_ENCODER)              // 带方向编码器对应使用的编码器接口 
-#define ENCODER_DIR_PULSE_1            	(PWMA_ENCODER_CH1P_P60)     // PULSE 对应的引脚
-#define ENCODER_DIR_DIR_1              	(PWMA_ENCODER_CH2P_P62)     // DIR 对应的引脚
+#define ENCODER_DIR_1                 	(TIM17_ENCODER)              // 带方向编码器对应使用的编码器接口 
+#define ENCODER_DIR_PULSE_1            	(TIM17_ENCODER_CH1_P80)     // PULSE 对应的引脚
+#define ENCODER_DIR_DIR_1              	(IO_P44)     // DIR 对应的引脚
 
-#define ENCODER_DIR_2                 	(PWMC_ENCODER)              // 带方向编码器对应使用的编码器接口
-#define ENCODER_DIR_PULSE_2       		(PWMC_ENCODER_CH1P_P40)     // PULSE 对应的引脚
-#define ENCODER_DIR_DIR_2           	(PWMC_ENCODER_CH2P_P42)     // DIR 对应的引脚
+#define ENCODER_DIR_2                 	(TIM18_ENCODER)              // 带方向编码器对应使用的编码器接口
+#define ENCODER_DIR_PULSE_2       		(TIM18_ENCODER_CH1_P90)     // PULSE 对应的引脚
+#define ENCODER_DIR_DIR_2           	(IO_P46)     // DIR 对应的引脚
 
 //250
 #define MAX_SPEED 100
