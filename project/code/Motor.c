@@ -123,7 +123,7 @@ void Dream_speed(void)
 
 void Motor_Loop(void)
 {
-	//Dream_speed();
+	Dream_speed();
 	Increment_PIDf(&pid_lf,(float)tar_speed,encoder_data_l);//+diff_left
 	Increment_PIDf(&pid_rf,(float)tar_speed,encoder_data_r);//+diff_right
 	

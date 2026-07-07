@@ -12,8 +12,8 @@ void System_Init(void)
 	  clock_init(SYSTEM_CLOCK_96M); 				// 时钟配置及系统初始化<务必保留>
 	  debug_init();                       		// 调试串口信息初始化
 
-		//display_init();
-
+		display_init();
+		
 		//蜂鸣器的初始化
 		gpio_init(IO_P65, GPO, 1, GPO_PUSH_PULL);
 	
@@ -24,29 +24,29 @@ void System_Init(void)
 		imu660ra_init();
 		
 		//编码器初始化
-//		encoder_quad_init(ENCODER_DIR_1, ENCODER_DIR_DIR_1, ENCODER_DIR_PULSE_1);   // 初始化编码器模块与引脚 带方向增量编码器模式
-//		encoder_quad_init(ENCODER_DIR_2, ENCODER_DIR_DIR_2, ENCODER_DIR_PULSE_2);   // 初始化编码器模块与引脚 带方向增量编码器模式
+		encoder_quad_init(ENCODER_DIR_1, ENCODER_DIR_DIR_1, ENCODER_DIR_PULSE_1);   // 初始化编码器模块与引脚 带方向增量编码器模式
+		encoder_quad_init(ENCODER_DIR_2, ENCODER_DIR_DIR_2, ENCODER_DIR_PULSE_2);   // 初始化编码器模块与引脚 带方向增量编码器模式
 
 		//按钮初始化
-//		gpio_init(KEY1_PIN, GPI, 1, GPI_PULL_UP);
-//		gpio_init(KEY2_PIN, GPI, 1, GPI_PULL_UP);
-//		gpio_init(KEY3_PIN, GPI, 1, GPI_PULL_UP);
-//		gpio_init(KEY4_PIN, GPI, 1, GPI_PULL_UP);
-//	
-//		gpio_init(SWITCH1_PIN, GPI, 1, GPI_PULL_UP);
-//		gpio_init(SWITCH2_PIN, GPI, 1, GPI_PULL_UP);
+		gpio_init(KEY1_PIN, GPI, 1, GPI_PULL_UP);
+		gpio_init(KEY2_PIN, GPI, 1, GPI_PULL_UP);
+		gpio_init(KEY3_PIN, GPI, 1, GPI_PULL_UP);
+		gpio_init(KEY4_PIN, GPI, 1, GPI_PULL_UP);
+	
+		gpio_init(SWITCH1_PIN, GPI, 1, GPI_PULL_UP);
+		gpio_init(SWITCH2_PIN, GPI, 1, GPI_PULL_UP);
 	
 		//舵机初始化
 		servo_init();
 		
 		//电机+PID初始化
-//		Motor_Init();
+		Motor_Init();
 		
 		//电池电压检测初始化  接口是1.0
 //		adc_init(ADC1_CH0_P10,ADC_12BIT);
 		
 
-	/*
+	
 //		//初始化摄像头
 		while(1)
 		{
@@ -61,7 +61,7 @@ void System_Init(void)
 		
 		if(!ControlFlag){
 			//wifi SPI初始化
-			while(wifi_spi_init("TCP", "91919191"))
+			while(wifi_spi_init("DENG", "12345678"))
 			{
 				gpio_set_level(IO_P65, 1);
 				system_delay_ms(100);                                                   // 初始化失败 等待 100ms
@@ -74,7 +74,7 @@ void System_Init(void)
 			seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, mt9v03x_image[0], MT9V03X_W, MT9V03X_H);
 			seekfree_assistant_camera_boundary_config(X_BOUNDARY, MT9V03X_H, left_control_line,right_control_line, mid_line,NULL,NULL,NULL);		
 		}
-*/
+
 		
 		
 ////			

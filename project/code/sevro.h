@@ -6,7 +6,7 @@
 #define SERVO_PWM3              (PWME_CH3P_PA4)                         // 定义主板上舵机对应引脚
 #define SERVO_PWM4              (PWME_CH4P_PA6)                         // 定义主板上舵机对应引脚
 
-#define SERVO_FREQ              (300)                                           // 定义主板上舵机频率  请务必注意范围 50-300
+#define SERVO_FREQ              (150)                                           // 定义主板上舵机频率  请务必注意范围 50-300
 
 // ------------------ 舵机占空比计算方式 ------------------
 //
@@ -24,11 +24,11 @@
 #endif
 
 
-#define SERVO_DUTY_MID   4450 
-#define SERVO_DUTY_MIN   3900   //向右
-#define SERVO_DUTY_MAX   5100   //向左 
-#define SERVO_CENTER 4450u
-#define MAX_TURN  550     //(((SERVO_DUTY_MAX)-(SERVO_DUTY_MIN))>>1)
+#define SERVO_DUTY_MID   4388 
+#define SERVO_DUTY_MIN   3935   //向右
+#define SERVO_DUTY_MAX   5071   //向左 
+#define SERVO_CENTER 4388u
+#define MAX_TURN  510     //(((SERVO_DUTY_MAX)-(SERVO_DUTY_MIN))>>1)
 
 #define controlReferenceLine 80
 #define Mid_Col 94  

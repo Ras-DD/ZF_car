@@ -306,9 +306,9 @@ int32 err_sum=0;
 void Error_sum(void)
 {
 	uint8 i;
-    int32 err1;
-    int32 err2;
-    int32 err3;
+    int32 err1 = 0;
+    int32 err2 = 0;
+    int32 err3 = 0;
 
 	for(i=8;i<28;i++){
 		err1+=mid_line[i];

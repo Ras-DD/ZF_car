@@ -5,11 +5,11 @@
 extern int16 encoder_data_r;
 extern int16 encoder_data_l;
 extern int16 tar_speed;
-#define  DIR_R              ( IO_P51 )
-#define  PWM_R              ( PWMD_CH1_P50 )
+#define  DIR_R              ( IO_P75 )
+#define  PWM_R              ( PWMB_CH1_P74 )
                               
-#define  DIR_L              ( IO_P53 )
-#define  PWM_L              ( PWMD_CH3_P52 )
+#define  DIR_L              ( IO_P77 )
+#define  PWM_L              ( PWMB_CH3_P76 )
 
 #define ENCODER_DIR_1                 	(PWMA_ENCODER)              // 带方向编码器对应使用的编码器接口 
 #define ENCODER_DIR_PULSE_1            	(PWMA_ENCODER_CH1P_P60)     // PULSE 对应的引脚

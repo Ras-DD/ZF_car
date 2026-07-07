@@ -10,8 +10,8 @@ void servo_setAngle(pwm_channel_enum sever,float angle)
 
 void servo_init(void)
 {
-	pwm_init(SERVO_PWM4,SERVO_FREQ,SERVO_DUTY(87.5));
-	pwm_set_duty(SERVO_PWM4,4450);//
+	pwm_init(SERVO_PWM4,SERVO_FREQ,0);
+	pwm_set_duty(SERVO_PWM4,SERVO_DUTY_MID);//
 }
 
 volatile uint16 huQiqiangServo(volatile uint16 input)
@@ -30,7 +30,7 @@ void Servo_Loop(void)
 {
 	Error_sum();
     PID_servof(&servo_pidf);
-	//Out_servo=huQiqiangServo(Out_servo);
+	Out_servo=huQiqiangServo(Out_servo);
     pwm_set_duty(SERVO_PWM4, (uint32)Out_servo);
 }
 
