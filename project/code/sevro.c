@@ -10,7 +10,7 @@ void servo_setAngle(pwm_channel_enum sever,float angle)
 
 void servo_init(void)
 {
-	pwm_init(SERVO_PWM4,SERVO_FREQ,0);
+	pwm_init(SERVO_PWM4,SERVO_FREQ,SERVO_DUTY(87.5));
 	pwm_set_duty(SERVO_PWM4,SERVO_DUTY_MID);//
 }
 
