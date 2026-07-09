@@ -12,7 +12,7 @@ void System_Init(void)
 	  clock_init(SYSTEM_CLOCK_96M); 				// 时钟配置及系统初始化<务必保留>
 	  debug_init();                       		// 调试串口信息初始化
 
-//		display_init();
+		display_init();
 		
 		//蜂鸣器的初始化
 		gpio_init(IO_P65, GPO, 1, GPO_PUSH_PULL);
@@ -59,7 +59,7 @@ void System_Init(void)
 			system_delay_ms(500);                                
 		}
 		
-		if(ControlFlag){
+		if(!ControlFlag){
 			//wifi SPI初始化
 			while(wifi_spi_init("DENG", "12345678"))
 			{

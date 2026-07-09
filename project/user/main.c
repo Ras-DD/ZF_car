@@ -77,11 +77,11 @@ void main(void)
 			Ring();
 			Fitted_Midline();
 			
-			if(ControlFlag){
-				seekfree_assistant_camera_send();	
-			}
+//			if(ControlFlag){
+//				seekfree_assistant_camera_send();	
+//			}
 			
-			Pre_Scan();
+//			Pre_Scan();
 			Target_find(pre_find_offset);
 			ips200_show_gray_image(0,0,(const uint8*)mt9v03x_image,188,120,188,120,tar_th);
 			
@@ -106,9 +106,9 @@ void main(void)
 			ips200_show_int16(0, 184, (int16)pid_lf.out);
 			ips200_show_int16(80, 184, (int16)pid_rf.out);
 
-			ips200_show_uint8(0, 200, ring_preMeet_flag);
-			ips200_show_uint8(70, 200, first_meeting_flag);
-			ips200_show_uint8(130, 200, ring_enter_flag);
+			ips200_show_uint8(0, 200, first_meeting_flag);
+//			ips200_show_uint8(70, 200, first_meeting_flag);
+//			ips200_show_uint8(130, 200, ring_enter_flag);
 			
 			
 			if(tar_flag)

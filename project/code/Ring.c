@@ -240,9 +240,11 @@ void Ring_First_meeting(void)
 	if(turnPoint && midPoint)
 		connect_point(turnPoint,midPoint,0);
 	
-	
+	ips200_show_uint8(70, 200, left_edge_line[115]);
+	ips200_show_uint8(130, 200, turnPoint);
+	ips200_show_uint8(0, 216, midPoint);
 	//终止条件    //少了弯道的元素互斥
-	if(midPoint && left_edge_line[115]<=2 && left_edge_line[85]<=2 &&left_edge_line[55]<=2)
+	if(midPoint&& left_edge_line[115]<=2 && left_edge_line[85]<=2 &&left_edge_line[55]<=2)
 	{
 		first_meeting_flag=1;
 	}
